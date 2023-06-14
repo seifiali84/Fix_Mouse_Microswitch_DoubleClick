@@ -1,0 +1,1 @@
+# Norex_Fix_Mouse_Microswitch_DoubleClick
