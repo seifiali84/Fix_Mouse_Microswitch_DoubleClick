@@ -99,9 +99,8 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
             // Set up the hook procedure using SetWindowsHookEx().
             IntPtr hookId = SetHook(_proc);
 
-            Console.WriteLine("Press any key to exit...");
-            while (!Console.KeyAvailable)
-                ;
+          
+            
 
             UnhookWindowsHookEx(hookId);
         }
