@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
 namespace Norex_Fix_Mouse_Microswitch_DoubleClick
 {
     public partial class Form1 : Form
@@ -6,7 +9,76 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
         {
             InitializeComponent();
         }
+        // define enums 
+        public enum MouseMessages
+        {
+            WM_LBUTTONDOWN = 0x0201,
+            WM_LBUTTONUP = 0x0202,
+        }
 
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+        public struct MSLLHOOKSTRUCT
+        {
+            public POINT pt;
+            public uint mouseData;
+            public uint flags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+        private const int WH_MOUSE_LL = 14;
+        private const int WM_LBUTTONDOWN = 0x0201;
+
+        // Define the callback delegate for handling low-level mouse input events.
+        private static LowLevelMouseProc _proc = HookCallback;
+
+        // Declare a global variable to store the time of the last left click event.
+        private static long _lastLeftClickTimeTicks = 0;
+
+        // This method removes our low-level mouse hook from the system.
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        // This method calls the next hook procedure in line and passes it information about our intercepted message.
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode,
+            IntPtr wParam, IntPtr lParam);
+
+        // This method retrieves a handle to the module that contains the specified address.
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        // This delegate describes a callback function for handling low-level mouse input events.
+        public delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+        static private IntPtr HookCallback(
+    int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0 && MouseMessages.WM_LBUTTONDOWN == (MouseMessages)wParam)
+            {
+                MSLLHOOKSTRUCT hookStruct =
+                    (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam,
+                        typeof(MSLLHOOKSTRUCT));
+
+                long currentTicks = DateTime.Now.Ticks;
+
+                if ((currentTicks - _lastLeftClickTimeTicks) / TimeSpan.TicksPerMillisecond < 5)
+                {
+                    Console.WriteLine("Ignoring double-click event.");
+                    return new System.IntPtr(1); // Return non-zero value to indicate we handled this message and it should not be passed on to other programs
+                }
+
+                _lastLeftClickTimeTicks = currentTicks;
+
+                Console.WriteLine($"Received left click at ({hookStruct.pt.X}, {hookStruct.pt.Y})");
+            }
+
+            return CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
 
