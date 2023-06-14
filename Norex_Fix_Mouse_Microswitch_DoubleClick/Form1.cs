@@ -104,7 +104,7 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
 
         private void button1_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
+            this.Hide();
             this.ShowInTaskbar = false;
         }
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -115,6 +115,11 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void notifyIcon1_Click(object sender, EventArgs e)
+        {
+            this.Show();
         }
     }
 }
