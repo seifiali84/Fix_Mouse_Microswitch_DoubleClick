@@ -52,6 +52,12 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+
+        // This method sets up a hook procedure that monitors low-level mouse input events.
+        public static extern IntPtr SetWindowsHookEx(int idHook,
+     LowLevelMouseProc lpfn, IntPtr hMod, uint dwThreadId);
+
         // This delegate describes a callback function for handling low-level mouse input events.
         public delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
 
@@ -79,9 +85,25 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
 
             return CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
         }
+        private static IntPtr SetHook(LowLevelMouseProc proc)
+        {
+            using (Process curProcess = Process.GetCurrentProcess())
+            using (ProcessModule curModule = curProcess.MainModule)
+            {
+                return SetWindowsHookEx(WH_MOUSE_LL, proc,
+                    GetModuleHandle(curModule.ModuleName), 0);
+            }
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Set up the hook procedure using SetWindowsHookEx().
+            IntPtr hookId = SetHook(_proc);
 
+            Console.WriteLine("Press any key to exit...");
+            while (!Console.KeyAvailable)
+                ;
+
+            UnhookWindowsHookEx(hookId);
         }
     }
 }
