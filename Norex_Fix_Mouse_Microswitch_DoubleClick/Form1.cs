@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace Norex_Fix_Mouse_Microswitch_DoubleClick
@@ -98,11 +99,22 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
         {
             // Set up the hook procedure using SetWindowsHookEx().
             IntPtr hookId = SetHook(_proc);
-
-          
-            
-
             UnhookWindowsHookEx(hookId);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+            this.ShowInTaskbar = false;
+        }
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Show();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
