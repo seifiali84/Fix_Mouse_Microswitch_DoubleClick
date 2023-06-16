@@ -96,11 +96,31 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
                     GetModuleHandle(curModule.ModuleName), 0);
             }
         }
+        string path = "data/data.csv";
+        private bool GetStartup()
+        {
+            string[] Lines = File.ReadAllLines(path);
+            if (Lines[0].Split(',')[1] == "True")
+                return true;
+            else
+                return false;
+        }
+        private void ChangeStartup(bool data)
+        {
+            string[] Lines = { "Startup," + data.ToString() };
+            File.WriteAllLines(path,Lines);
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             // Set up the hook procedure using SetWindowsHookEx().
             IntPtr hookId = SetHook(_proc);
             UnhookWindowsHookEx(hookId);
+            bool Startup = GetStartup();
+            if(Startup != checkBox1.Checked)
+            {
+                programChange = true;
+                checkBox1.Checked = !checkBox1.Checked;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -138,6 +158,7 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
                     if (result == DialogResult.Yes)
                     {
                         rk.SetValue(Application.ProductName, Application.ExecutablePath);
+                        ChangeStartup(true);
                     }
                     else
                     {
@@ -151,6 +172,7 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
                     if (result == DialogResult.Yes)
                     {
                         rk.DeleteValue(Application.ProductName, false);
+                        ChangeStartup(false);
                     }
                     else
                     {
