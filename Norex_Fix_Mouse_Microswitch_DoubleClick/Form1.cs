@@ -122,32 +122,41 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
         {
             this.Show();
         }
-
+        bool programChange = false;
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-            if (checkBox1.Checked)
+            if (programChange)
             {
-                DialogResult result = MessageBox.Show("Are you sure to make this Program Startup?", "Confirmation", MessageBoxButtons.YesNo);
-                if(result == DialogResult.Yes)
-                {
-                    rk.SetValue(Application.ProductName, Application.ExecutablePath);
-                }
-                else
-                {
-                    checkBox1.Checked = false;
-                }
+                programChange = false;
             }
             else
             {
-                DialogResult result = MessageBox.Show("do you need to Disable Startup this Program?" , "Confirmation" , MessageBoxButtons.YesNo);
-                if(result == DialogResult.Yes)
+                RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                if (checkBox1.Checked)
                 {
-                    rk.DeleteValue(Application.ProductName, false);
+                    DialogResult result = MessageBox.Show("Are you sure to make this Program Startup?", "Confirmation", MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
+                    {
+                        rk.SetValue(Application.ProductName, Application.ExecutablePath);
+                    }
+                    else
+                    {
+                        programChange = true;
+                        checkBox1.Checked = false;
+                    }
                 }
                 else
                 {
-                    checkBox1.Checked = true;
+                    DialogResult result = MessageBox.Show("do you need to Disable Startup this Program?", "Confirmation", MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
+                    {
+                        rk.DeleteValue(Application.ProductName, false);
+                    }
+                    else
+                    {
+                        programChange = true;
+                        checkBox1.Checked = true;
+                    }
                 }
             }
         }
