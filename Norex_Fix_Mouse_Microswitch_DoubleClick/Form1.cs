@@ -1,3 +1,4 @@
+using Microsoft.Win32;
 using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -120,6 +121,35 @@ namespace Norex_Fix_Mouse_Microswitch_DoubleClick
         private void notifyIcon1_Click(object sender, EventArgs e)
         {
             this.Show();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            if (checkBox1.Checked)
+            {
+                DialogResult result = MessageBox.Show("Are you sure to make this Program Startup?", "Confirmation", MessageBoxButtons.YesNo);
+                if(result == DialogResult.Yes)
+                {
+                    rk.SetValue(Application.ProductName, Application.ExecutablePath);
+                }
+                else
+                {
+                    checkBox1.Checked = false;
+                }
+            }
+            else
+            {
+                DialogResult result = MessageBox.Show("do you need to Disable Startup this Program?" , "Confirmation" , MessageBoxButtons.YesNo);
+                if(result == DialogResult.Yes)
+                {
+                    rk.DeleteValue(Application.ProductName, false);
+                }
+                else
+                {
+                    checkBox1.Checked = true;
+                }
+            }
         }
     }
 }
